@@ -1,0 +1,957 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fossil Atlas — Single File Edition</title>
+<meta name="description" content="An interactive museum-style atlas of extinct animals, their last known dates, habitats, and stories." />
+<style>
+:root{--ink:#18211d;--muted:#64706a;--paper:#f6f3eb;--paper2:#eeeadf;--moss:#2d4a3b;--moss2:#486754;--amber:#b66a2d;--line:#d9d3c6;--white:#fffdf8;--shadow:0 18px 55px rgba(35,43,38,.11);}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial, Helvetica, sans-serif}button,input,select{font:inherit}.shell{max-width:1240px;margin:auto;padding:0 24px}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(246,243,235,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(217,211,198,.8)}.nav{height:74px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:11px;align-items:center;font-weight:700;letter-spacing:-.03em}.mark{width:34px;height:34px;border-radius:11px;background:var(--moss);display:grid;place-items:center;color:#f4e7cf;font-family:Georgia;font-size:20px}.navlinks{display:flex;gap:24px;color:var(--muted);font-size:14px}.navlinks a{color:inherit;text-decoration:none}.navlinks a:hover{color:var(--ink)}
+.hero{padding:76px 0 42px;display:grid;grid-template-columns:1.18fr .82fr;gap:60px;align-items:center}.eyebrow{color:var(--amber);font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}.hero h1{font-family:Georgia, 'Times New Roman', serif;font-size:clamp(48px,7vw,84px);line-height:.98;letter-spacing:-.055em;margin:16px 0 22px;max-width:800px}.hero p{font-size:18px;line-height:1.7;color:var(--muted);max-width:680px;margin:0}.hero-card{min-height:390px;border-radius:28px;position:relative;overflow:hidden;background:radial-gradient(circle at 70% 22%,#a8b69e 0 6%,transparent 7%),linear-gradient(145deg,#324c3f,#18251f 68%);box-shadow:var(--shadow);padding:28px;color:#f5f0e5}.hero-card:before{content:"";position:absolute;width:260px;height:260px;border:1px solid rgba(255,255,255,.2);border-radius:50%;right:-55px;top:60px}.hero-card:after{content:"†";position:absolute;font-family:Georgia;font-size:340px;line-height:1;color:rgba(245,240,229,.07);right:20px;bottom:-75px}.hero-stat{position:absolute;left:28px;bottom:28px}.hero-stat strong{display:block;font-family:'Playfair Display';font-size:56px;line-height:1}.hero-stat span{color:#cbd4ca;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin:24px 0 64px}.stat{background:var(--white);padding:25px}.stat b{display:block;font-family:'Playfair Display';font-size:30px}.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.explore{display:grid;grid-template-columns:270px 1fr;gap:36px;padding-bottom:90px}.filters{position:sticky;top:96px;align-self:start;background:var(--white);border:1px solid var(--line);border-radius:22px;padding:20px}.filters h3{font-family:'Playfair Display';font-size:22px;margin:4px 0 20px}.field{margin-bottom:18px}.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:8px}.field input,.field select{width:100%;border:1px solid var(--line);background:#faf8f1;border-radius:11px;padding:11px 12px;color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:var(--moss);box-shadow:0 0 0 3px rgba(45,74,59,.1)}.results-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.results-head h2{font-family:'Playfair Display';font-size:32px;margin:0}.results-head span{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--white);border:1px solid var(--line);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,border-color .2s}.card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(35,43,38,.1);border-color:#c7bfaf}.art{height:190px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--tone,#425d4d),#18241f)}.art:before{content:"";position:absolute;inset:22px;border:1px solid rgba(255,255,255,.16);border-radius:50%}.art .glyph{position:absolute;right:20px;bottom:-10px;font-family:Georgia;font-size:150px;line-height:1;color:rgba(255,250,240,.13)}.era{position:absolute;top:14px;left:14px;background:rgba(250,247,238,.9);color:var(--ink);padding:5px 8px;border-radius:8px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}.card-body{padding:17px}.card h3{font-family:'Playfair Display';font-size:22px;margin:0 0 4px}.latin{font-family:Georgia;color:var(--muted);font-style:italic;font-size:13px}.meta{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-size:11px;color:var(--muted)}.extinct{color:var(--amber);font-weight:700}
+.timeline{padding:80px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.timeline h2,.about h2{font-family:'Playfair Display';font-size:42px;margin:0 0 10px}.timeline p,.about p{color:var(--muted);max-width:700px;line-height:1.7}.rail{display:flex;gap:12px;overflow:auto;padding:28px 0 12px}.milestone{min-width:170px;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:15px}.milestone b{font-family:'Playfair Display';font-size:22px}.milestone span{display:block;font-size:12px;color:var(--muted);margin-top:5px}
+.about{padding:80px 0}.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px}.note{background:var(--moss);color:#eef0e9;border-radius:24px;padding:28px}.note h3{font-family:'Playfair Display';font-size:27px;margin-top:0}.note p{color:#d2dbd2}.footer{padding:25px 0 50px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(18,24,21,.68);display:none;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}.dialog{background:var(--white);width:min(900px,100%);max-height:90vh;overflow:auto;border-radius:28px;box-shadow:0 30px 90px rgba(0,0,0,.25)}.dialog-top{height:230px;padding:28px;position:relative;background:linear-gradient(145deg,#344e40,#17221d);color:#fff}.dialog-top .glyph{position:absolute;right:45px;bottom:-35px;font:180px/1 Georgia;color:rgba(255,255,255,.11)}.close{position:absolute;right:18px;top:18px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:20px}.dialog-top h2{font-family:'Playfair Display';font-size:42px;max-width:560px;margin:45px 0 5px}.dialog-top em{color:#d2dbd2}.dialog-body{padding:28px}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}.fact{background:#f4f1e8;border-radius:14px;padding:14px}.fact small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}.fact b{display:block;margin-top:4px}.dialog-body h3{font-family:'Playfair Display';font-size:24px;margin:22px 0 7px}.dialog-body p{color:#4e5a54;line-height:1.7}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:5px 9px;margin:3px;font-size:11px;color:var(--muted)}
+.modal-visual{height:250px;border-radius:18px;overflow:hidden;margin-bottom:22px;background:#18241f;border:1px solid var(--line)}.modal-visual img{width:100%;height:100%;display:block;object-fit:cover}.card{cursor:pointer}.card:focus-visible{outline:3px solid var(--amber);outline-offset:3px}.card::after{content:"OPEN SPECIMEN →";position:absolute;opacity:0;pointer-events:none;right:12px;top:12px;background:rgba(24,33,29,.85);color:#fff;padding:7px 9px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:.08em;transition:opacity .2s ease}.card{position:relative}.card:hover::after,.card:focus-visible::after{opacity:1}.art .image-credit{position:absolute;left:14px;bottom:12px;color:rgba(255,255,255,.75);font-size:9px;letter-spacing:.06em;text-transform:uppercase;z-index:2}
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;background:var(--white);border:1px dashed var(--line);border-radius:20px;color:var(--muted)}
+@media(max-width:950px){.hero{grid-template-columns:1fr}.hero-card{min-height:280px}.explore{grid-template-columns:1fr}.filters{position:static}.grid{grid-template-columns:repeat(2,1fr)}.about-grid{grid-template-columns:1fr}.navlinks{display:none}}
+@media(max-width:620px){.shell{padding:0 16px}.hero{padding-top:45px}.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero h1{font-size:54px}.facts{grid-template-columns:1fr}.dialog-top h2{font-size:34px}.nav{height:64px}}
+
+/* Spatial / cinematic layer */
+body{overflow-x:hidden;background:radial-gradient(circle at 20% 10%,rgba(91,119,101,.12),transparent 32%),radial-gradient(circle at 90% 45%,rgba(182,106,45,.09),transparent 28%),var(--paper)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.25;background-image:linear-gradient(rgba(24,33,29,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(24,33,29,.035) 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(to bottom,black,transparent 75%);z-index:-1}
+.cursor-glow{position:fixed;width:260px;height:260px;border-radius:50%;pointer-events:none;z-index:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(137,166,144,.14),transparent 68%);mix-blend-mode:multiply;transition:left .18s ease,top .18s ease}
+.topbar{background:rgba(246,243,235,.72);box-shadow:0 10px 35px rgba(30,40,34,.05)}
+.nav{perspective:900px}.brand{transform:translateZ(20px);transition:transform .3s ease}.brand:hover{transform:translateZ(35px) rotateX(4deg)}
+.hero{perspective:1400px}.hero-copy{animation:riseIn .8s cubic-bezier(.2,.75,.2,1) both}.hero-card{transform-style:preserve-3d;animation:floatCard 7s ease-in-out infinite;transition:transform .25s ease,box-shadow .25s ease}.hero-card:hover{box-shadow:0 30px 80px rgba(23,36,29,.25)}
+.hero-card .orbit{position:absolute;border:1px solid rgba(255,255,255,.18);border-radius:50%;width:310px;height:140px;right:-30px;top:85px;transform:rotate(-18deg);animation:spin 18s linear infinite}.hero-card .orbit:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:#d8ad7d;right:28px;top:14px;box-shadow:0 0 25px rgba(216,173,125,.8)}
+.card{transform-style:preserve-3d;will-change:transform;animation:cardIn .55s cubic-bezier(.2,.8,.2,1) both}.card:hover{transform:translateY(-9px) rotateX(2deg) rotateY(-2deg) scale(1.015);box-shadow:0 25px 55px rgba(35,43,38,.16)}
+.card .art{transition:transform .55s ease,filter .55s ease}.card:hover .art{transform:scale(1.035);filter:saturate(1.08)}
+.animal-img{position:absolute;z-index:1;inset:0;width:100%;height:100%;object-fit:cover;opacity:.92;transition:transform .7s cubic-bezier(.2,.75,.2,1),filter .5s ease;filter:saturate(.82) contrast(.98)}.card:hover .animal-img{transform:scale(1.09);filter:saturate(1.05) contrast(1.03)}
+.art:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,20,16,.12),rgba(10,20,16,.56));pointer-events:none}.art .glyph{z-index:2}.era{z-index:3}.image-credit{position:absolute;right:10px;bottom:9px;z-index:4;color:rgba(255,255,255,.78);font-size:9px;background:rgba(0,0,0,.28);padding:4px 6px;border-radius:999px;backdrop-filter:blur(6px)}
+.dialog{transform-style:preserve-3d;animation:modalIn .38s cubic-bezier(.2,.85,.2,1)}.dialog-top{min-height:300px}.dialog-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.48}.dialog-top:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(17,30,23,.96),rgba(17,30,23,.55),rgba(17,30,23,.25))}.dialog-top>*{z-index:3}.dialog-top h2,.dialog-top em,.dialog-top .eyebrow,.dialog-top .close{position:relative}.dialog-top .glyph{z-index:2}.modal.open{animation:fadeIn .2s ease}.facts .fact{transition:transform .25s ease,background .25s ease}.facts .fact:hover{transform:translateY(-3px);background:#ebe6da}
+.reveal{opacity:1;transform:translateY(0);transition:opacity .7s ease,transform .7s ease}.reveal.visible{opacity:1;transform:none}
+@keyframes riseIn{from{opacity:0;transform:translateY(24px) translateZ(-20px)}to{opacity:1;transform:none}}@keyframes floatCard{0%,100%{transform:translateY(0) rotateX(1deg) rotateY(-2deg)}50%{transform:translateY(-9px) rotateX(-1deg) rotateY(2deg)}}@keyframes spin{to{transform:rotate(342deg)}}@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.985)}to{opacity:1;transform:none}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes modalIn{from{opacity:0;transform:translateY(22px) scale(.97) rotateX(2deg)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}.cursor-glow{display:none}}
+.img-loading{opacity:.35;filter:blur(2px);background:linear-gradient(135deg,#30473c,#18251f);}.animal-img{object-fit:cover;background:#24382f;}.img-failed{opacity:.18}.img-ready{opacity:1;filter:none}.image-credit a{color:inherit;text-decoration:underline;text-underline-offset:2px}.art:has(.img-ready){background:#17231e}.art:has(.img-ready) .glyph{opacity:.12}
+/* =========================================================
+   UI/UX PRO MAX — FOSSIL ATLAS EDITORIAL SYSTEM
+   Applied to the existing single-file experience.
+   ========================================================= */
+:root{
+  --ink:#17211d;
+  --ink-soft:#2d3832;
+  --muted:#69746d;
+  --paper:#f5f1e8;
+  --paper2:#ebe5d8;
+  --surface:#fffdf8;
+  --surface-soft:#faf7f0;
+  --moss:#244437;
+  --moss-2:#3c6251;
+  --moss-3:#78907d;
+  --brass:#a86b32;
+  --brass-soft:#d4aa79;
+  --line:#ddd5c6;
+  --line-strong:#cfc5b3;
+  --shadow:0 20px 60px rgba(29,39,33,.09);
+  --shadow-lg:0 30px 90px rgba(29,39,33,.18);
+  --radius-lg:28px;
+  --radius-md:18px;
+  --radius-sm:12px;
+}
+
+html{scroll-padding-top:92px}
+body{
+  font-family:"DM Sans",Arial,sans-serif;
+  background:
+    radial-gradient(circle at 8% 5%,rgba(72,103,84,.10),transparent 27%),
+    radial-gradient(circle at 92% 42%,rgba(168,107,50,.08),transparent 25%),
+    var(--paper);
+  color:var(--ink);
+}
+body:before{
+  opacity:.13;
+  background-size:44px 44px;
+}
+.shell{max-width:1320px;padding:0 32px}
+
+.topbar{
+  background:rgba(245,241,232,.82);
+  border-bottom:1px solid rgba(207,197,179,.72);
+  box-shadow:0 8px 30px rgba(28,38,32,.045);
+}
+.nav{height:78px}
+.brand{
+  gap:12px;
+  font-size:13px;
+  letter-spacing:.14em;
+}
+.mark{
+  width:36px;height:36px;border-radius:12px;
+  background:var(--moss);
+  box-shadow:0 8px 20px rgba(36,68,55,.18);
+}
+.navlinks{gap:28px;font-size:13px;font-weight:600}
+.navlinks a{
+  position:relative;
+  padding:8px 0;
+}
+.navlinks a:after{
+  content:"";
+  position:absolute;left:0;right:100%;bottom:1px;height:1px;
+  background:var(--brass);
+  transition:right .22s ease;
+}
+.navlinks a:hover:after{right:0}
+
+.hero{
+  min-height:650px;
+  padding:92px 0 62px;
+  grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);
+  gap:76px;
+}
+.eyebrow{
+  color:var(--brass);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.20em;
+}
+.hero h1{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:clamp(54px,6.6vw,92px);
+  font-weight:600;
+  line-height:.94;
+  letter-spacing:-.055em;
+  margin:18px 0 28px;
+  max-width:850px;
+}
+.hero p{
+  font-size:17px;
+  line-height:1.8;
+  max-width:650px;
+  color:#66716a;
+}
+.hero-card{
+  min-height:430px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:32px;
+  background:
+    linear-gradient(135deg,rgba(22,39,31,.82),rgba(26,49,39,.96)),
+    radial-gradient(circle at 70% 20%,#829b89 0 4%,transparent 5%);
+  box-shadow:var(--shadow-lg);
+  overflow:hidden;
+}
+.hero-card:before{
+  width:320px;height:320px;
+  right:-70px;top:46px;
+  border-color:rgba(235,224,202,.18);
+}
+.hero-card:after{opacity:.65}
+.hero-card-kicker{
+  position:absolute;
+  top:28px;left:30px;
+  color:rgba(245,240,229,.7);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.18em;
+}
+.hero-card .orbit{
+  width:360px;height:170px;
+  right:-38px;top:95px;
+}
+.hero-stat strong{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:68px;
+  letter-spacing:-.05em;
+}
+.hero-stat span{
+  display:block;
+  max-width:180px;
+  line-height:1.5;
+  margin-top:5px;
+}
+
+.stats{
+  margin:0 0 82px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  box-shadow:0 12px 35px rgba(35,43,38,.04);
+}
+.stat{padding:28px 26px;background:rgba(255,253,248,.9)}
+.stat b{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:34px;
+  letter-spacing:-.03em;
+}
+.stat span{font-size:10px;font-weight:600;color:#748078}
+
+.explore{
+  grid-template-columns:280px minmax(0,1fr);
+  gap:44px;
+  padding-bottom:110px;
+}
+.filters{
+  top:100px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:24px;
+  background:rgba(255,253,248,.9);
+  box-shadow:0 14px 40px rgba(35,43,38,.055);
+}
+.filters h3{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:25px;
+  font-weight:600;
+  margin:0 0 24px;
+}
+.field{margin-bottom:20px}
+.field label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.13em;
+  color:#7a847d;
+}
+.field input,.field select{
+  border:1px solid var(--line);
+  background:var(--surface-soft);
+  border-radius:12px;
+  padding:12px 13px;
+  min-height:44px;
+  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.field input:hover,.field select:hover{
+  border-color:#bdb3a2;
+  background:#fffdf8;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--moss);
+  box-shadow:0 0 0 4px rgba(36,68,55,.09);
+}
+.search-wrap{position:relative}
+.search-wrap input{padding-right:58px}
+.search-wrap kbd{
+  position:absolute;
+  right:9px;top:50%;
+  transform:translateY(-50%);
+  border:1px solid var(--line);
+  border-bottom-width:2px;
+  border-radius:7px;
+  background:#fffdf8;
+  color:#89918b;
+  font-size:9px;
+  padding:4px 6px;
+  pointer-events:none;
+}
+
+.results-head{
+  align-items:flex-end;
+  margin-bottom:24px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+.results-head h2{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:40px;
+  line-height:1;
+  font-weight:600;
+  letter-spacing:-.035em;
+  margin:7px 0 0;
+}
+.results-head>span{
+  color:#78827c;
+  font-size:11px;
+  font-weight:600;
+}
+.collection-intro{
+  color:#79837c;
+  font-size:13px;
+  line-height:1.55;
+  margin:10px 0 0;
+}
+
+.grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:20px;
+}
+.card{
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:rgba(255,253,248,.94);
+  box-shadow:0 8px 26px rgba(35,43,38,.035);
+  transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease;
+}
+.card:hover{
+  transform:translateY(-7px);
+  border-color:#c6bba9;
+  box-shadow:0 22px 48px rgba(35,43,38,.13);
+}
+.art{
+  height:220px;
+  background:linear-gradient(135deg,#344f42,#17241e);
+}
+.animal-img{
+  opacity:.96;
+  filter:saturate(.84) contrast(1.01);
+}
+.card:hover .animal-img{
+  transform:scale(1.055);
+  filter:saturate(1) contrast(1.03);
+}
+.art:after{
+  background:linear-gradient(180deg,rgba(10,20,16,.03),rgba(10,20,16,.62));
+}
+.era{
+  top:14px;left:14px;
+  background:rgba(250,247,238,.94);
+  color:#304139;
+  border:1px solid rgba(255,255,255,.35);
+  padding:6px 9px;
+  border-radius:999px;
+  font-size:9px;
+  letter-spacing:.10em;
+}
+.image-credit{
+  left:12px;right:auto;bottom:11px;
+  font-size:8px;
+  letter-spacing:.09em;
+}
+.card-body{padding:19px 19px 18px}
+.card h3{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:23px;
+  font-weight:600;
+  letter-spacing:-.02em;
+}
+.latin{font-family:Georgia,serif;font-size:12px;color:#7b857e}
+.meta{
+  margin-top:16px;
+  padding-top:13px;
+  color:#7a847d;
+  font-size:10px;
+  letter-spacing:.02em;
+}
+.extinct{color:var(--brass)}
+
+.card::after{
+  content:"VIEW SPECIMEN";
+  top:14px;right:14px;
+  background:rgba(23,33,29,.82);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(8px);
+  padding:7px 9px;
+  border-radius:999px;
+  font-size:8px;
+  letter-spacing:.12em;
+}
+.card:focus-visible{
+  outline:3px solid rgba(168,107,50,.65);
+  outline-offset:4px;
+}
+
+.timeline{
+  padding:100px 0;
+  background:rgba(235,229,216,.42);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.timeline h2,.about h2{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:46px;
+  font-weight:600;
+  letter-spacing:-.035em;
+}
+.timeline p,.about p{color:#68736c;line-height:1.8}
+.rail{
+  gap:14px;
+  padding:32px 0 10px;
+  scrollbar-width:thin;
+}
+.milestone{
+  min-width:190px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  background:rgba(255,253,248,.86);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.milestone:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 28px rgba(35,43,38,.07);
+}
+.milestone b{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:25px;
+}
+.milestone span{font-size:11px;line-height:1.45}
+
+.about{padding:100px 0}
+.about-grid{gap:64px}
+.note{
+  border-radius:24px;
+  padding:34px;
+  background:linear-gradient(145deg,#284b3b,#1b3027);
+  box-shadow:var(--shadow);
+}
+.note h3{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:30px;
+  font-weight:600;
+}
+.note p{color:#d4ddd5}
+
+.modal{
+  background:rgba(13,20,17,.72);
+  backdrop-filter:blur(9px);
+}
+.dialog{
+  width:min(960px,100%);
+  border-radius:30px;
+  box-shadow:0 35px 110px rgba(0,0,0,.34);
+  border:1px solid rgba(255,255,255,.12);
+}
+.dialog-top{min-height:330px;padding:30px}
+.dialog-top h2{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:50px;
+  line-height:1;
+  font-weight:600;
+  letter-spacing:-.04em;
+  margin-top:70px;
+}
+.dialog-body{padding:30px}
+.modal-visual{
+  height:290px;
+  border-radius:18px;
+  background:#17241e;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.facts{
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.fact{
+  background:#f1ece1;
+  border:1px solid #e3dbcb;
+  border-radius:14px;
+  padding:15px;
+}
+.fact small{
+  color:#7b857e;
+  font-size:9px;
+  font-weight:700;
+}
+.fact b{font-size:13px}
+.dialog-body h3{
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:27px;
+  font-weight:600;
+}
+.dialog-body p{font-size:14px;line-height:1.8}
+.tag{
+  border-color:#d5ccbc;
+  background:#faf7f0;
+  color:#6f7a73;
+}
+
+.footer{
+  padding:30px 0 54px;
+  border-top:1px solid var(--line);
+  font-size:10px;
+  letter-spacing:.04em;
+}
+
+/* Better interaction defaults */
+button,a,input,select,.card{cursor:pointer}
+input{cursor:text}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{
+  outline:3px solid rgba(168,107,50,.38);
+  outline-offset:2px;
+}
+
+/* More intentional motion; no motion for users who request less animation. */
+@keyframes riseInPro{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:none}
+}
+.hero-copy{animation:riseInPro .7s cubic-bezier(.2,.75,.2,1) both}
+.hero-card{animation:floatCard 8s ease-in-out infinite}
+.card{animation:none}
+.reveal{transition:opacity .6s ease,transform .6s ease}
+
+@media(max-width:1100px){
+  .hero{gap:48px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:820px){
+  .shell{padding:0 22px}
+  .hero{
+    min-height:auto;
+    padding:68px 0 48px;
+    grid-template-columns:1fr;
+  }
+  .hero-card{min-height:330px}
+  .stats{margin-bottom:64px}
+  .explore{grid-template-columns:1fr;gap:28px}
+  .filters{position:static}
+  .timeline,.about{padding:76px 0}
+  .timeline h2,.about h2{font-size:39px}
+}
+@media(max-width:620px){
+  .shell{padding:0 16px}
+  .nav{height:68px}
+  .brand{font-size:11px}
+  .hero{padding-top:48px}
+  .hero h1{font-size:50px}
+  .hero p{font-size:15px}
+  .hero-card{min-height:290px;border-radius:24px}
+  .stats{grid-template-columns:1fr 1fr;border-radius:18px}
+  .stat{padding:20px 17px}
+  .stat b{font-size:28px}
+  .grid{grid-template-columns:1fr;gap:16px}
+  .art{height:235px}
+  .results-head{align-items:flex-start;gap:12px}
+  .results-head h2{font-size:34px}
+  .collection-intro{font-size:12px}
+  .timeline h2,.about h2{font-size:34px}
+  .facts{grid-template-columns:1fr 1fr}
+  .dialog-top{min-height:300px}
+  .dialog-top h2{font-size:38px}
+  .modal-visual{height:220px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-copy,.hero-card{animation:none!important}
+}
+
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* COMPLETE SPECIMEN PROFILE */
+.profile-gallery{margin-bottom:30px}
+.gallery-main{height:420px;border-radius:22px;overflow:hidden;background:#18241f;position:relative;border:1px solid var(--line);box-shadow:0 14px 35px rgba(25,38,31,.10)}
+.gallery-main img{width:100%;height:100%;display:block;object-fit:cover;transition:opacity .2s ease}
+.gallery-main img.gallery-loading{opacity:.25}
+.gallery-nav{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:46px;height:46px;border:1px solid rgba(255,255,255,.35);border-radius:50%;background:rgba(18,29,24,.72);color:#fff;font-size:34px;line-height:1;cursor:pointer;backdrop-filter:blur(8px)}
+.gallery-nav:hover{background:rgba(18,29,24,.92);transform:translateY(-50%) scale(1.05)}
+.gallery-prev{left:16px}.gallery-next{right:16px}
+.gallery-count{position:absolute;right:16px;bottom:16px;background:rgba(18,29,24,.78);color:#fff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:700;letter-spacing:.08em}
+.gallery-thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:10px}
+.gallery-thumb{height:76px;border:2px solid transparent;border-radius:12px;overflow:hidden;background:#edf0eb;padding:0;cursor:pointer}
+.gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-thumb.active{border-color:var(--amber);box-shadow:0 0 0 2px rgba(216,173,125,.18)}
+.gallery-credit{margin-top:9px;color:var(--muted);font-size:10px;line-height:1.5}
+.gallery-credit a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.profile-intro{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:start;padding:4px 0 22px;border-bottom:1px solid var(--line)}
+.profile-kicker{display:block;color:#9a7652;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px}
+.profile-intro h3{font-family:'Playfair Display';font-size:30px;margin:0 0 8px}
+.profile-intro p{margin:0;max-width:720px}
+.profile-status{min-width:125px;padding:15px 17px;background:#edf2ed;border:1px solid #d8e1d9;border-radius:15px;text-align:center}
+.profile-status span{display:block;font-size:9px;letter-spacing:.14em;font-weight:800;color:var(--muted)}
+.profile-status strong{display:block;margin-top:5px;color:#385347;font-size:12px;letter-spacing:.1em}
+.profile-sections{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.profile-section{padding:20px;border:1px solid var(--line);border-radius:18px;background:#fbfaf6}
+.profile-section h3{margin:0 0 8px!important;font-size:22px!important}
+.profile-section p{margin:0}
+.profile-wide{grid-column:1/-1}
+.why-section{background:#f2eee4}
+.tag-row{margin-top:20px;padding-top:13px;border-top:1px solid var(--line)}
+@media(max-width:700px){
+  .gallery-main{height:310px}
+  .gallery-thumbs{grid-template-columns:repeat(4,1fr)}
+  .gallery-thumb:nth-child(5){display:none}
+  .profile-intro{grid-template-columns:1fr}
+  .profile-sections{grid-template-columns:1fr}
+  .profile-wide{grid-column:auto}
+}
+@media(max-width:480px){
+  .gallery-main{height:250px}
+  .gallery-thumbs{grid-template-columns:repeat(3,1fr)}
+  .gallery-thumb:nth-child(4),.gallery-thumb:nth-child(5){display:none}
+  .gallery-nav{width:38px;height:38px;font-size:27px}
+}
+</style></head>
+<body>
+<header class="topbar"><div class="shell nav"><div class="brand"><div class="mark">F</div> FOSSIL ATLAS</div><nav class="navlinks"><a href="#explore">Explore</a><a href="#timeline">Timeline</a><a href="#about">About</a></nav></div></header>
+<main>
+<section class="shell hero"><div class="hero-copy"><div class="eyebrow">A field guide to vanished life</div><h1>Remember the animals we can no longer meet.</h1><p>Explore a curated museum-style atlas of extinct species—from ice-age giants to island birds. Search by name, habitat, era, or extinction date, then open any specimen for its story.</p></div><div class="hero-card"><div class="hero-card-kicker">FIELD ARCHIVE / 01</div><div class="orbit"></div><div class="hero-stat"><strong>50+</strong><span>documented species in this edition</span></div></div></section>
+<section class="shell stats reveal"><div class="stat"><b id="countStat">54</b><span>species catalogued</span></div><div class="stat"><b>5</b><span>habitat groups</span></div><div class="stat"><b>50,000+</b><span>years of history</span></div><div class="stat"><b>∞</b><span>stories worth remembering</span></div></section>
+<section class="shell explore" id="explore"><aside class="filters"><h3>Find a specimen</h3><div class="field"><label for="search">Search</label><div class="search-wrap"><input id="search" placeholder="e.g. dodo, tiger, whale" autocomplete="off" /><kbd>⌘ K</kbd></div></div><div class="field"><label for="habitat">Habitat</label><select id="habitat"><option value="all">All habitats</option><option>Island</option><option>Forest</option><option>Grassland</option><option>Ocean</option><option>Freshwater</option><option>Ice age</option></select></div><div class="field"><label for="sort">Sort</label><select id="sort"><option value="name">Name A–Z</option><option value="recent">Most recent extinction</option><option value="ancient">Oldest extinction</option></select></div></aside><div><div class="results-head"><div><div class="eyebrow">The collection</div><h2>Extinct animals</h2><p class="collection-intro">Real specimens, reconstructed histories, and the final traces of vanished life.</p></div><span id="resultCount"></span></div><div class="grid" id="grid"></div></div></section>
+<section class="timeline" id="timeline"><div class="shell"><div class="eyebrow">Deep time → modern history</div><h2>A timeline of disappearance</h2><p>Extinction is not a single moment. For many species, the date below represents the last confirmed individual, the last accepted sighting, or a later scientific declaration. Dates marked “c.” are approximate.</p><div class="rail" id="rail"></div></div></section>
+<section class="shell about" id="about"><div class="about-grid"><div><div class="eyebrow">About the atlas</div><h2>A quiet archive for loud histories.</h2><p>Fossil Atlas is designed as an educational starting point. Each profile combines a commonly cited extinction date with habitat, range, diet, size, causes of decline, and a short historical note.</p><p><strong>Important:</strong> extinction dates can be debated, especially for prehistoric species and animals whose last individuals may have survived unnoticed. “Extinct” here means no living population is known to remain.</p></div><div class="note"><h3>Read the dates carefully</h3><p>Some species have a precise final-record date, such as the last known passenger pigeon in 1914. Others are necessarily approximate—for example, many Pleistocene megafauna disappeared thousands of years ago and cannot be assigned a single calendar year.</p><p style="font-size:12px;margin-bottom:0">For a production research site, pair each entry with primary literature, IUCN assessments, museum collections, and fossil records.</p></div></div></section>
+</main>
+<footer class="footer"><div class="shell">FOSSIL ATLAS · Educational concept · Dates are presented as commonly cited or approximate extinction dates.</div></footer>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mName">
+  <div class="dialog">
+    <div class="dialog-top">
+      <button class="close" id="close" aria-label="Close animal details">×</button>
+      <div class="eyebrow" style="color:#d8ad7d">SPECIMEN RECORD · EXTINCT ANIMALS</div>
+      <h2 id="mName"></h2>
+      <em id="mLatin"></em>
+      <div class="glyph" id="mGlyph"></div>
+    </div>
+    <div class="dialog-body">
+      <section class="profile-gallery" aria-label="Animal photo gallery">
+        <div class="gallery-main">
+          <button class="gallery-nav gallery-prev" id="galleryPrev" aria-label="Previous image">‹</button>
+          <img id="mImage" alt="" />
+          <button class="gallery-nav gallery-next" id="galleryNext" aria-label="Next image">›</button>
+          <div class="gallery-count" id="galleryCount">1 / 1</div>
+        </div>
+        <div class="gallery-thumbs" id="galleryThumbs"></div>
+        <div class="gallery-credit" id="galleryCredit"></div>
+      </section>
+
+      <div class="profile-intro">
+        <div>
+          <span class="profile-kicker">ABOUT THE ANIMAL</span>
+          <h3 id="mAboutTitle">A closer look</h3>
+          <p id="mAbout"></p>
+        </div>
+        <div class="profile-status">
+          <span>STATUS</span>
+          <strong id="mStatus">EXTINCT</strong>
+        </div>
+      </div>
+
+      <div class="facts" id="mFacts"></div>
+
+      <div class="profile-sections">
+        <section class="profile-section">
+          <span class="profile-kicker">NATURAL HISTORY</span>
+          <h3>Habitat & range</h3>
+          <p id="mHabitat"></p>
+        </section>
+        <section class="profile-section">
+          <span class="profile-kicker">LIFESTYLE</span>
+          <h3>Diet & way of life</h3>
+          <p id="mDiet"></p>
+        </section>
+        <section class="profile-section profile-wide">
+          <span class="profile-kicker">EXTINCTION STORY</span>
+          <h3>What happened?</h3>
+          <p id="mStory"></p>
+        </section>
+        <section class="profile-section profile-wide why-section">
+          <span class="profile-kicker">CONSERVATION CONTEXT</span>
+          <h3>Why it matters</h3>
+          <p id="mWhy"></p>
+        </section>
+      </div>
+
+      <div class="tag-row" id="mTags"></div>
+    </div>
+  </div>
+</div>
+<script>
+const animals=[
+['Dodo','Raphus cucullatus',1662,'Island','Mauritius','Herbivore','1 m','Forest & scrub','Flightless pigeon famous for its trusting nature and isolation on Mauritius. Introduced predators and human hunting rapidly changed its island ecosystem.','A symbol of human-caused extinction and the vulnerability of island species.','D'],
+['Passenger pigeon','Ectopistes migratorius',1914,'Forest','North America','Seed eater','41 cm','Eastern forests','Once one of North America’s most abundant birds, it moved in enormous flocks. Commercial hunting and habitat loss drove a spectacular population collapse.','Its story demonstrates how a species can disappear within a few human generations despite once being extraordinarily numerous.','P'],
+['Great auk','Pinguinus impennis',1844,'Ocean','North Atlantic','Fish eater','75–85 cm','Coasts & islands','A large flightless seabird hunted for meat, eggs, feathers, and bait. The final confirmed pair was killed on Eldey Island, Iceland.','The great auk is a classic example of overexploitation of a slow-breeding island and coastal animal.','G'],
+['Thylacine','Thylacinus cynocephalus',1936,'Forest','Tasmania','Carnivore','1.8 m','Woodlands','The largest known marsupial predator of modern times, with distinctive stripes and a powerful jaw. Persecution and bounty hunting were major pressures.','Its disappearance remains a powerful conservation lesson for endemic predators.','T'],
+['Quagga','Equus quagga quagga',1883,'Grassland','Southern Africa','Grazer','1.3 m','Open plains','A zebra relative with stripes concentrated toward the front of its body. Intensive hunting and competition with livestock eliminated the wild population.','Quagga remains are central to research on extinct diversity within living lineages.','Q'],
+['Steller’s sea cow','Hydrodamalis gigas',1768,'Ocean','Bering Sea','Herbivore','8–9 m','Kelp forests','A giant sirenian discovered by European science in 1741 and hunted relentlessly for meat after its discovery.','Its extinction in only decades is one of the clearest historical examples of rapid overharvesting.','S'],
+['Moa','Dinornithiformes',1440,'Island','New Zealand','Herbivore','Up to 3.6 m','Forests & grasslands','Several species of giant flightless birds once occupied New Zealand. Human hunting and ecosystem changes followed Polynesian settlement.','Moa reveal how large island animals can vanish quickly when faced with new pressures.','M'],
+['Elephant bird','Aepyornithidae',1000,'Island','Madagascar','Omnivore','Up to 3 m','Forests & wetlands','A group of enormous flightless birds from Madagascar, producing some of the largest known bird eggs.','Their disappearance helps reconstruct how human settlement and environmental change altered Madagascar.','E'],
+['Pyrenean ibex','Capra pyrenaica pyrenaica',2000,'Grassland','Pyrenees','Herbivore','1 m','Mountain slopes','A mountain goat subspecies that survived centuries of pressure before the final known individual died in 2000.','It became the first extinct taxon to be cloned experimentally, highlighting both conservation urgency and scientific limits.','I'],
+['Caribbean monk seal','Neomonachus tropicalis',1952,'Ocean','Caribbean','Carnivore','2.4 m','Coastal waters','A tropical seal once widespread around the Caribbean and Gulf of Mexico. Hunting for oil and disturbance drove its decline.','It is the only seal species known to have disappeared from the Caribbean in modern times.','C'],
+['Japanese sea lion','Zalophus japonicus',1974,'Ocean','Japan & Korea','Carnivore','2.5 m','Rocky coasts','A sea lion once breeding along the coasts of Japan and Korea. Commercial hunting and fisheries pressure caused its decline.','Its loss changed the marine communities around the region and remains relevant to marine conservation.','J'],
+['Falkland Islands wolf','Dusicyon australis',1876,'Grassland','Falkland Islands','Carnivore','1.3 m','Open country','The only native land mammal of the Falkland Islands, hunted after European settlement and by collectors.','Its rapid disappearance illustrates how island endemics can have few places to retreat.','F'],
+['Carolina parakeet','Conuropsis carolinensis',1939,'Forest','Eastern North America','Omnivore','32 cm','Bottomland forests','A brilliantly colored parrot that lived in large social flocks. Hunting, persecution, and habitat loss contributed to its disappearance.','It was the only native parrot species in the eastern United States.','C'],
+['Heath hen','Tympanuchus cupido cupido',1932,'Grassland','Northeastern USA','Herbivore','43 cm','Coastal heath','A prairie-chicken relative restricted to the coastal heathlands of Massachusetts by the 20th century.','Conservation attempts came too late to recover the tiny final population.','H'],
+['Dusky seaside sparrow','Ammospiza maritima nigrescens',1987,'Freshwater','Florida, USA','Omnivore','15 cm','Marshes','A dark-plumaged sparrow specialized to salt marshes around the St. Johns River. Drainage and habitat alteration caused severe decline.','It shows how specialized habitat requirements can make small populations especially fragile.','D'],
+['Bramble Cay melomys','Melomys rubicola',2016,'Island','Torres Strait','Herbivore','15 cm','Low coral cay','A tiny rodent restricted to Bramble Cay. Rising seas and repeated storm-driven flooding destroyed its habitat and food plants.','It is widely cited as the first mammal extinction attributed primarily to modern climate change.','B'],
+['Christmas Island pipistrelle','Pipistrellus murrayi',2009,'Forest','Christmas Island','Insectivore','3–4 g','Tropical forest','A small bat whose population collapsed despite conservation interventions and intensive monitoring.','Its disappearance highlights the conservation challenges faced by endemic island bats.','C'],
+['Tecopa pupfish','Cyprinodon nevadensis calidae',1981,'Freshwater','California, USA','Omnivore','5 cm','Desert springs','A desert fish adapted to hot spring water. Alteration of spring flows and habitat reduced it to extinction.','It demonstrates the sensitivity of highly specialized freshwater species to engineering changes.','T'],
+['Schomburgk’s deer','Rucervus schomburgki',1938,'Grassland','Thailand','Herbivore','1.8 m','Seasonally flooded plains','A deer of central Thailand’s marshy plains, where conversion to rice agriculture and hunting removed its habitat.','Its antlers are preserved in collections, but no living population remains known.','S'],
+['Bluebuck','Hippotragus leucophaeus',1800,'Grassland','South Africa','Herbivore','1.1 m','Cape grasslands','A blue-gray antelope from the southwestern Cape. European expansion, hunting, and habitat conversion contributed to its disappearance.','It was among the first large African mammals lost in the historical record.','B'],
+['Aurochs','Bos primigenius',1627,'Grassland','Europe, Asia, North Africa','Herbivore','1.8 m','Woodlands & plains','The wild ancestor of domestic cattle. The last recorded aurochs died in Poland in 1627.','Domestic cattle preserve much of the aurochs legacy, making its extinction unusually visible in living descendants.','A'],
+['Tarpan','Equus ferus ferus',1909,'Grassland','Eastern Europe','Herbivore','1.3 m','Steppe','A wild horse lineage of Eurasian grasslands. The last commonly accepted wild tarpan died in captivity in 1909.','Its history is intertwined with debates about re-created “tarpan” horses and what counts as restoration.','T'],
+['Bali tiger','Panthera tigris balica',1937,'Forest','Bali','Carnivore','2.2 m','Tropical forest','The smallest recognized tiger subspecies, confined to the island of Bali. Hunting and habitat conversion ended the population.','Island tigers show how geographic isolation can create distinctive forms—and magnify extinction risk.','B'],
+['Javan tiger','Panthera tigris sondaica',1980,'Forest','Java','Carnivore','2.5 m','Tropical forest','A tiger population endemic to Java. Forest conversion, prey loss, and hunting drove a long decline.','Its disappearance is part of a wider history of large carnivore loss in Southeast Asia.','J'],
+['Caspian tiger','Panthera tigris virgata',2003,'Forest','Central Asia','Carnivore','2.7 m','Riverine forest','A tiger population once ranging from Turkey and the Caucasus across Central Asia. Habitat conversion and prey depletion contributed to its disappearance.','Historical records reveal a much wider tiger range than remains today.','C'],
+['Yangtze giant softshell turtle','Rafetus swinhoei',2023,'Freshwater','China & Vietnam','Omnivore','Up to 1 m','Lakes & rivers','One of the world’s rarest turtles; its extinction status is uncertain and the last confirmed individuals have disappeared from records.','Included as a cautionary case: some species are “possibly extinct” rather than scientifically settled extinct.','Y'],
+['Chinese paddlefish','Psephurus gladius',2019,'Freshwater','Yangtze River','Fish eater','Up to 7 m','Large rivers','A giant river fish known from the Yangtze. Overfishing, dams, shipping, and habitat fragmentation drove its decline.','It was one of the largest freshwater fish ever known and a landmark example of river ecosystem collapse.','P'],
+['Baiji','Lipotes vexillifer',2002,'Freshwater','Yangtze River','Fish eater','2.5 m','River channels','A freshwater dolphin endemic to the Yangtze. By the early 2000s, intensive searches could no longer find a surviving population.','The baiji is often described as functionally extinct because absolute extinction is difficult to prove.','B'],
+['Woolly mammoth','Mammuthus primigenius',1700,'Ice age','Northern Eurasia & North America','Herbivore','3.4 m','Tundra-steppe','An iconic Ice Age elephant covered in dense hair and equipped with huge curved tusks. Small island populations survived long after mainland populations vanished.','Mammoth remains provide an extraordinary record of past climates, ecosystems, and human interactions.','W'],
+['Smilodon','Smilodon fatalis',10000,'Ice age','North & South America','Carnivore','1.2 m','Open woodland','A saber-toothed cat with powerful forelimbs and elongated upper canines. It disappeared near the end of the Pleistocene.','Its fossils help scientists study predator-prey relationships during major climate and ecosystem shifts.','S'],
+['Irish elk','Megaloceros giganteus',7700,'Ice age','Eurasia','Herbivore','2.1 m','Open woodland','A giant deer famous for enormous antlers that could span more than 3 m. It survived into the early Holocene.','Its antlers are often used to discuss sexual selection, nutrition, and climate in extinct megafauna.','I'],
+['Giant ground sloth','Megatherium americanum',10000,'Ice age','South America','Herbivore','6 m','Woodlands & plains','A massive ground-dwelling sloth that could rear on its hind legs to browse vegetation.','It belongs to a diverse radiation of giant sloths that vanished from the Americas near the end of the Ice Age.','G'],
+['Cave bear','Ursus spelaeus',24000,'Ice age','Europe','Herbivore','1.5 m','Caves & woodland','A large bear that occupied European caves and fed heavily on plants. Its extinction predates the end of the Ice Age.','Cave deposits preserve detailed clues about its diet, hibernation, and interactions with humans.','C'],
+['Dire wolf','Aenocyon dirus',10000,'Ice age','North & South America','Carnivore','1 m','Open habitats','A robust canid of Pleistocene America, heavier-built than living gray wolves.','New genetic work places dire wolves on a distinct branch of the canid family tree rather than as simple oversized gray wolves.','D'],
+['American lion','Panthera atrox',10000,'Ice age','North America','Carnivore','1.2 m','Open woodland','One of the largest felids of Pleistocene North America, roaming from Alaska to Mexico.','Its fossils reveal a predator community very different from modern North America.','A'],
+['Glyptodon','Glyptodon spp.',10000,'Ice age','South America','Herbivore','3 m','Grassland','A heavily armored relative of modern armadillos, with a large domed shell.','Its fossils illustrate the remarkable size diversity of ancient armored mammals.','G'],
+['Arctotherium','Arctotherium angustidens',11000,'Ice age','South America','Omnivore','3.4 m','Open woodland','A giant short-faced bear and one of the largest terrestrial carnivorous mammals known from the fossil record.','It shows that South America once supported mammalian predators far larger than any living bear.','A'],
+['Megalania','Varanus priscus',50000,'Ice age','Australia','Carnivore','5–7 m','Woodland & savanna','A giant monitor lizard that lived in Pleistocene Australia.','Its size and disappearance form part of the evidence for Australia’s ancient megafaunal turnover.','M'],
+['Genyornis','Genyornis newtoni',47000,'Ice age','Australia','Herbivore','2.1 m','Open woodland','A giant flightless bird related to modern Australian birds, known from eggshells and fossils.','Eggshell evidence provides clues about human use of fire and changing environments in ancient Australia.','G'],
+['Haast’s eagle','Hieraaetus moorei',1400,'Island','New Zealand','Carnivore','Wing span 2.6–3 m','Forests & open country','A huge eagle that preyed on moa and other large animals in New Zealand.','Its extinction followed the loss of its main prey after human settlement, demonstrating ecological cascade effects.','H'],
+['Laughing owl','Ninox albifacies',1914,'Island','New Zealand','Carnivore','35 cm','Open forest','A large owl known from New Zealand with a distinctive call. It disappeared after habitat change and introduced predators affected its range.','Museum specimens and historical accounts preserve evidence of a bird lost within the modern era.','L'],
+['Huia','Heteralocha acutirostris',1907,'Forest','New Zealand','Insectivore','48 cm','Native forest','A New Zealand wattlebird famous for the different bill shapes of males and females.','Its tail feathers became prized trade objects, contributing to collecting pressure.','H'],
+['Labrador duck','Camptorhynchus labradorius',1878,'Ocean','North Atlantic','Filter feeder','53 cm','Coastal waters','A poorly understood sea duck known from museum specimens and historical records.','It is a reminder that extinction can occur before natural history is fully understood.','L'],
+['Eskimo curlew','Numenius borealis',1963,'Grassland','Arctic Americas','Insectivore','30 cm','Tundra & prairie','A migratory shorebird once numbering in the millions. Market hunting caused a dramatic population crash.','Its decline is an early warning of how harvest can threaten migratory species across continents.','E'],
+['Rocky Mountain locust','Melanoplus spretus',1902,'Grassland','North America','Herbivore','2.5 cm','Prairie','A grasshopper once forming immense swarms across the Great Plains. Intensive agriculture and habitat alteration coincided with its collapse.','One of the most abundant insects known became extinct within a few decades.','R'],
+['Tecopa pupfish','Cyprinodon nevadensis calidae',1981,'Freshwater','California, USA','Omnivore','5 cm','Desert springs','A heat-tolerant pupfish restricted to two spring systems. Water diversion and habitat modification caused its loss.','A classic example of a species disappearing when its entire range fits inside a few altered water sources.','T'],
+['Formosan clouded leopard','Neofelis nebulosa brachyura',2013,'Forest','Taiwan','Carnivore','1.2 m','Mountain forest','A proposed island subspecies with no confirmed records for decades. Its taxonomic status and extinction remain debated.','Included as a case study in the difference between “no confirmed sightings” and proven extinction.','F'],
+['Lesser Antillean macaw','Ara guadeloupensis',1760,'Island','Caribbean','Herbivore','45 cm','Tropical forest','A large Caribbean macaw known mainly from historical accounts and illustrations.','Its disappearance predates modern conservation science, leaving uncertainty around its exact ecology.','L'],
+['Rodrigues solitaire','Pezophaps solitaria',1761,'Island','Rodrigues','Herbivore','75 cm','Woodland','A flightless relative of the dodo that evolved on Rodrigues in the Indian Ocean.','Its bones reveal a distinct island lineage and provide clues about the diversity of flightless birds.','R'],
+['Mauritius blue pigeon','Alectroenas nitidissimus',1830,'Island','Mauritius','Frugivore','30 cm','Forest','A large fruit-eating pigeon with vivid coloration, last reported in the 19th century.','Its loss reflects the extensive historical transformation of Mauritius forests.','M'],
+['Crescent nail-tail wallaby','Onychogalea lunata',1956,'Grassland','Australia','Herbivore','45 cm','Woodland & scrub','A small wallaby with a distinctive tail spur, once widespread across parts of southern Australia.','Predation by introduced foxes and habitat change contributed to its disappearance.','C'],
+['Toolache wallaby','Macropus greyi',1939,'Grassland','Australia','Herbivore','70 cm','Wet grassland','A graceful wallaby from southeastern Australia that declined after habitat conversion and hunting.','Its extinction is a major example of mammal losses associated with land-use change in Australia.','T'],
+['Eastern quoll (mainland)','Dasyurus viverrinus',1960,'Forest','Australia','Carnivore','40 cm','Woodland','The mainland population disappeared from much of southeastern Australia, while the species survives in Tasmania.','Included to show that local extinction and global extinction are different conservation categories.','Q']
+];
+// Remove duplicate by name+year while preserving the curated catalog.
+const data=animals.filter((a,i)=>animals.findIndex(b=>b[0]===a[0]&&b[2]===a[2])===i);
+const IMAGE_CACHE={};
+const IMAGE_SOURCE={};
+const DIRECT_IMAGES={
+  'american-lion':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Panthera%20leo%20atrox%20Sergiodlarosa.jpg',
+  'arctotherium':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Arctotherium.jpg',
+  'aurochs':'https://commons.wikimedia.org/wiki/Special:Redirect/file/An%20aurochs%20reconstruction.jpg',
+  'great-auk':'https://commons.wikimedia.org/wiki/Special:Redirect/file/PinguinusImpennus.jpg',
+  'passenger-pigeon':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Ectopistes%20migratorius%20%28passenger%20pigeon%29.jpg',
+  'thylacine':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Thylacinus.jpg',
+  'quagga':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Equus%20quagga%20quagga.jpg',
+  'pyrenean-ibex':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Pyrenean%20Ibex.png',
+  'elephant-bird':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Elephant%20bird.jpg',
+  'woolly-mammoth':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Mammuthus%20primigenius%201.jpg',
+  'caspian-tiger':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Panthera%20tigris%20virgata.jpg',
+  'falkland-islands-wolf':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Dusicyon.png',
+  'cave-bear':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Ursus%20spelaeus%20cave%20bear.jpg',
+  'glyptodon':'https://commons.wikimedia.org/wiki/Special:Redirect/file/GLYPTODON.jpg',
+
+  // Verified animal images — do not allow generic/person/chart search results here.
+  'formosan-clouded-leopard':'https://commons.wikimedia.org/wiki/Special:Redirect/file/Specimen%20of%20Neofelis%20nebulosa%20brachyura%20in%20National%20Taiwan%20Museum.JPG',
+  'christmas-island-pipistrelle':'https://cdn.sanity.io/images/dhoneoxg/production/4addf45f80979b23d01b7b3772ca8517f1453b1b-1901x1271.jpg/Lindy%20Lumsden%20Christmas%20Island%20Pipistrelle%202.jpg?auto=format&h=1000&w=1400'
+};
+function commonsQuery(a){return `${a[0]} ${a[1]}`;}
+async function findCommonsImage(a){
+  const key=slugify(a[0]);
+  if(IMAGE_CACHE[key]) return IMAGE_CACHE[key];
+  if(DIRECT_IMAGES[key]){
+    IMAGE_CACHE[key]=DIRECT_IMAGES[key];
+    IMAGE_SOURCE[key]=DIRECT_IMAGES[key];
+    return DIRECT_IMAGES[key];
+  }
+  try{
+    const url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(commonsQuery(a))+'&gsrnamespace=6&gsrlimit=1&prop=imageinfo&iiprop=url&iiurlwidth=1000&format=json&origin=*';
+    const r=await fetch(url,{cache:'force-cache'});
+    const j=await r.json();
+    const pages=j.query&&j.query.pages?Object.values(j.query.pages):[];
+    const info=pages[0]?.imageinfo?.[0];
+    const img=info?.thumburl||info?.url;
+    if(img){IMAGE_CACHE[key]=img;IMAGE_SOURCE[key]=pages[0]?.fullurl||img;return img;}
+  }catch(e){}
+  return '';
+}
+async function loadRealImage(img,a){
+  const key=slugify(a[0]);
+  img.classList.add('img-loading');
+  const url=await findCommonsImage(a);
+  if(url){
+    img.onload=()=>{img.classList.remove('img-loading');img.classList.add('img-ready');};
+    img.onerror=()=>{img.classList.remove('img-loading');img.classList.add('img-failed');};
+    img.src=url;
+    const credit=img.closest('.art')?.querySelector('.image-credit');
+    if(credit){
+      const sourceLabel = key==='christmas-island-pipistrelle' ? 'NFSA / Lindy Lumsden' : 'Wikimedia Commons';
+      credit.innerHTML=`REAL IMAGE · <a href="${IMAGE_SOURCE[key]||url}" target="_blank" rel="noopener">${sourceLabel} ↗</a>`;
+    }
+  }else{img.classList.remove('img-loading');img.classList.add('img-failed');}
+}
+const grid=document.getElementById('grid'),search=document.getElementById('search'),habitat=document.getElementById('habitat'),sort=document.getElementById('sort'),resultCount=document.getElementById('resultCount');
+const hue=['#385347','#5c4d39','#4b5d66','#604a3f','#46583e','#6a503a','#394f60','#5b5142'];
+function render(){let q=search.value.toLowerCase().trim(),h=habitat.value;let arr=data.filter(a=>(!q||a.join(' ').toLowerCase().includes(q))&&(h==='all'||a[3]===h));arr.sort((a,b)=>sort.value==='name'?a[0].localeCompare(b[0]):sort.value==='recent'?b[2]-a[2]:a[2]-b[2]);resultCount.textContent=`${arr.length} of ${data.length} records`;grid.innerHTML=arr.length?arr.map((a,i)=>`<article class="card reveal" tabindex="0" role="button" aria-label="Open details for ${a[0]}" data-index="${data.indexOf(a)}"><div class="art" style="--tone:${hue[i%hue.length]}"><img class="animal-img" data-animal="${encodeURIComponent(a[0])}" src="" alt="Real image of ${a[0]}" loading="eager"><span class="era">${a[3]}</span><div class="glyph">${a[9]}</div><span class="image-credit">Wikimedia / Wikipedia</span></div><div class="card-body"><h3>${a[0]}</h3><div class="latin">${a[1]}</div><div class="meta"><span>${a[4]}</span><span class="extinct">Extinct · ${formatYear(a[2])}</span></div></div></article>`).join(''):`<div class="empty">No specimens match those filters. Try another name or habitat.</div>`;document.querySelectorAll('.card').forEach(c=>{const open=()=>openModal(data[+c.dataset.index]);c.addEventListener('click',open);c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})}); if(typeof revealAll==='function') revealAll()}
+function slugify(v){return v.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+function formatYear(y){return y<0?`${Math.abs(y).toLocaleString()} BCE`:y<1000?`c. ${y} CE`:`${y}`}
+function hydrateImages(){document.querySelectorAll('.animal-img').forEach(img=>{const a=data[+img.closest('.card').dataset.index];loadRealImage(img,a)})}
+let currentGallery = [];
+let currentGalleryIndex = 0;
+let currentAnimalKey = '';
+
+function safeText(v){return String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function galleryCandidates(a){
+  const key=slugify(a[0]);
+  const direct=key==='formosan-clouded-leopard'
+    ? ['https://commons.wikimedia.org/wiki/Special:Redirect/file/Specimen%20of%20Neofelis%20nebulosa%20brachyura%20in%20National%20Taiwan%20Museum.JPG',
+       'https://commons.wikimedia.org/wiki/Special:Redirect/file/Neofelis%20nebulosa%20brachyura.jpg',
+       'https://commons.wikimedia.org/wiki/Special:Redirect/file/LeopardusBrachyurusWolf.jpg']
+    : key==='christmas-island-pipistrelle'
+    ? ['https://cdn.sanity.io/images/dhoneoxg/production/4addf45f80979b23d01b7b3772ca8517f1453b1b-1901x1271.jpg/Lindy%20Lumsden%20Christmas%20Island%20Pipistrelle%202.jpg?auto=format&h=1000&w=1400']
+    : key==='glyptodon'
+    ? ['https://commons.wikimedia.org/wiki/Special:Redirect/file/GLYPTODON.jpg',
+       'https://commons.wikimedia.org/wiki/Special:Redirect/file/FMNH%20Glyptodon.jpg',
+       'https://commons.wikimedia.org/wiki/Special:Redirect/file/Glyptodon.jpg',
+       'https://commons.wikimedia.org/wiki/Special:Redirect/file/Glyptodon%20fossil%2C%20Tellus%20Science%20Museum%201.jpg',
+       'https://commons.wikimedia.org/wiki/Special:Redirect/file/Glyptodon%20model.JPG']
+    : (DIRECT_IMAGES[key] ? [DIRECT_IMAGES[key]] : []);
+  return direct;
+}
+
+function isLikelyAnimalPhoto(title){
+  const t=(title||'').toLowerCase();
+  const bad=['graph','chart','diagram','map','distribution','range map','logo','flag','coat of arms','timeline','table','screenshot','poster','stamp','sketch map'];
+  return !bad.some(x=>t.includes(x));
+}
+
+async function findGallery(a){
+  const key=slugify(a[0]);
+  const found=[];
+  const seen=new Set();
+
+  for(const u of galleryCandidates(a)){
+    if(u && !seen.has(u)){seen.add(u);found.push({url:u,source:u,credit:key==='christmas-island-pipistrelle'?'NFSA / Lindy Lumsden':'Wikimedia Commons'});}
+  }
+
+  const searches=[a[1], `"${a[0]}"`];
+  for(const query of searches){
+    if(found.length>=5) break;
+    try{
+      const url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+
+        encodeURIComponent(query)+'&gsrnamespace=6&gsrlimit=12&prop=imageinfo&iiprop=url|mime&iiurlwidth=1200&format=json&origin=*';
+      const r=await fetch(url,{cache:'force-cache'});
+      const j=await r.json();
+      const pages=j.query&&j.query.pages?Object.values(j.query.pages):[];
+      for(const p of pages){
+        const title=p.title||'';
+        const info=p.imageinfo?.[0];
+        const mime=info?.mime||'';
+        const img=info?.thumburl||info?.url;
+        if(!img || !mime.startsWith('image/') || !isLikelyAnimalPhoto(title)) continue;
+        if(seen.has(img)) continue;
+        seen.add(img);
+        found.push({url:img,source:p.fullurl||img,credit:'Wikimedia Commons'});
+        if(found.length>=5) break;
+      }
+    }catch(e){}
+  }
+
+  // If Commons has fewer than three usable photographs, keep the profile usable
+  // rather than displaying a graph/map or an unrelated placeholder.
+  return found.slice(0,5);
+}
+
+function renderGallery(){
+  const main=document.getElementById('mImage');
+  const thumbs=document.getElementById('galleryThumbs');
+  const count=document.getElementById('galleryCount');
+  const credit=document.getElementById('galleryCredit');
+
+  if(!currentGallery.length){
+    main.removeAttribute('src');
+    main.alt='No verified photograph available';
+    thumbs.innerHTML='<div style="padding:15px;color:#6b756f;font-size:12px">No verified gallery photographs were found for this specimen.</div>';
+    count.textContent='0 / 0';
+    credit.textContent='The profile remains available using the catalog record and verified text details.';
+    return;
+  }
+
+  const item=currentGallery[currentGalleryIndex];
+  main.src=item.url;
+  main.alt=`Photograph of ${currentAnimalKey}`;
+  count.textContent=`${currentGalleryIndex+1} / ${currentGallery.length}`;
+  credit.innerHTML=`IMAGE ${currentGalleryIndex+1} · ${safeText(item.credit)} · <a href="${item.source}" target="_blank" rel="noopener">View source ↗</a>`;
+
+  thumbs.innerHTML=currentGallery.map((g,i)=>`
+    <button class="gallery-thumb ${i===currentGalleryIndex?'active':''}" data-gallery-index="${i}" aria-label="View image ${i+1}">
+      <img src="${g.url}" alt="" loading="lazy">
+    </button>`).join('');
+
+  thumbs.querySelectorAll('.gallery-thumb').forEach(btn=>{
+    btn.addEventListener('click',()=>{currentGalleryIndex=+btn.dataset.galleryIndex;renderGallery()});
+  });
+}
+
+async function openModal(a){
+  currentAnimalKey=a[0];
+  currentGalleryIndex=0;
+  currentGallery=[];
+  const modal=document.getElementById('modal');
+
+  document.getElementById('mName').textContent=a[0];
+  document.getElementById('mLatin').textContent=a[1];
+  document.getElementById('mGlyph').textContent=a[9];
+
+  const about = `${a[8]} ${a[7]} habitat in ${a[4]} shaped its natural history. The species is remembered through ${a[5].toLowerCase()} ecology, museum records, historical accounts, and scientific research.`;
+  document.getElementById('mAbout').textContent=about;
+  document.getElementById('mAboutTitle').textContent=`About ${a[0]}`;
+
+  document.getElementById('mFacts').innerHTML=[
+    ['Last record',formatYear(a[2])],
+    ['Habitat',a[3]],
+    ['Range',a[4]],
+    ['Diet',a[5]],
+    ['Typical size',a[6]],
+    ['Environment',a[7]]
+  ].map(x=>`<div class="fact"><small>${x[0]}</small><b>${safeText(x[1])}</b></div>`).join('');
+
+  document.getElementById('mHabitat').textContent=
+    `${a[0]} was associated with ${a[7].toLowerCase()} in ${a[4]}. Its recorded habitat category is ${a[3].toLowerCase()}, and the documented range in this atlas is ${a[4]}. Habitat availability, fragmentation, human land use, and ecological change are important context when interpreting its disappearance.`;
+
+  document.getElementById('mDiet').textContent=
+    `The atlas classifies ${a[0]} as a ${a[5].toLowerCase()}. Its typical size is recorded as ${a[6]}. Feeding ecology, movement, breeding, and dependence on particular habitats can strongly affect how a population responds to environmental change.`;
+
+  document.getElementById('mStory').textContent=a[8];
+  document.getElementById('mWhy').textContent=a[9];
+  document.getElementById('mTags').innerHTML=`<span class="tag">${safeText(a[3])}</span><span class="tag">${safeText(a[5])}</span><span class="tag">${safeText(a[4])}</span><span class="tag">Extinct · ${formatYear(a[2])}</span>`;
+
+  document.getElementById('galleryThumbs').innerHTML='<div style="padding:15px;color:#6b756f;font-size:12px">Loading verified photographs…</div>';
+  document.getElementById('galleryCount').textContent='…';
+  document.getElementById('galleryCredit').textContent='Finding species-specific photographs…';
+  modal.classList.add('open');
+  document.body.style.overflow='hidden';
+
+  currentGallery=await findGallery(a);
+  renderGallery();
+}
+
+document.getElementById('galleryPrev').onclick=()=>{
+  if(!currentGallery.length)return;
+  currentGalleryIndex=(currentGalleryIndex-1+currentGallery.length)%currentGallery.length;
+  renderGallery();
+};
+document.getElementById('galleryNext').onclick=()=>{
+  if(!currentGallery.length)return;
+  currentGalleryIndex=(currentGalleryIndex+1)%currentGallery.length;
+  renderGallery();
+};
+
+document.getElementById('close').onclick=()=>{document.getElementById('modal').classList.remove('open');document.body.style.overflow='';};
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')document.getElementById('close').click()});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && document.getElementById('modal').classList.contains('open')) document.getElementById('close').click();
+  if(e.key==='ArrowLeft' && document.getElementById('modal').classList.contains('open')) document.getElementById('galleryPrev').click();
+  if(e.key==='ArrowRight' && document.getElementById('modal').classList.contains('open')) document.getElementById('galleryNext').click();
+});
+[search,habitat,sort].forEach(x=>x.addEventListener('input',render));
+const observer=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.08});
+function revealAll(){document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));hydrateImages()}
+const timeline=data.filter((a,i)=>i<1||i%4===0).sort((a,b)=>a[2]-b[2]).slice(0,10);document.getElementById('rail').innerHTML=timeline.map(a=>`<div class="milestone"><b>${formatYear(a[2])}</b><span>${a[0]}</span></div>`).join('');document.getElementById('countStat').textContent=data.length;render();
+revealAll();
+const glow=document.createElement('div');glow.className='cursor-glow';document.body.appendChild(glow);window.addEventListener('pointermove',e=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px'});
+window.addEventListener('scroll',()=>{document.querySelector('.hero-card')?.style.setProperty('transform',`translateY(${window.scrollY*.018}px)`)});
+</script>
+
+<script>
+(() => {
+  const input = document.getElementById('search');
+  if (!input) return;
+  window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+    if (e.key === 'Escape' && document.activeElement === input) {
+      input.value = '';
+      input.dispatchEvent(new Event('input', {bubbles:true}));
+      input.blur();
+    }
+  });
+})();
+</script>
+
+</body></html>
